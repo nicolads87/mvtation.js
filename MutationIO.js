@@ -8,13 +8,16 @@ function Mutation(id, model) {
     //var dataModel = $(this.view).attr('data-model');
     var dataModel = this.view.dataset.model;
     this.isInput = function() {
-       return $(this.view).is('input'); 
+       //return $(this.view).is('input');
+        return document.getElementById(id).tagName === "INPUT";  
     }
     if(this.isInput()) {
         //TODO: update when change value attribure from inspector. Use mutations.
         this.view.onkeyup = function() {
-            $(self.view).attr('value', $(self.view).val());
-            model[dataModel] = $(self.view).val();    
+            document.getElementById(id).setAttribute('value', document.getElementById(id).value);
+            model[dataModel] = document.getElementById(id).value;    
+            //$(self.view).attr('value', $(self.view).val());
+            //model[dataModel] = $(self.view).val();    
         }    
     }
     var observer = new MutationObserver(function(mutations) {
@@ -47,10 +50,13 @@ function Mutation(id, model) {
         }
         
         if(self.isInput()) {
-            $(self.view).attr('value', modelValue);
-            $(self.view).val(modelValue);    
+            //$(self.view).attr('value', modelValue);
+            //$(self.view).val(modelValue); 
+            document.getElementById(id).value = modelValue;
+            document.getElementById(id).setAttribute('value', document.getElementById(id).value);
         }else {
-            $(self.view).html(modelValue);
+            //$(self.view).html(modelValue);
+            document.getElementById(id).innerHTML = modelValue;
         }
         
     });
