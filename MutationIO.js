@@ -5,7 +5,8 @@ function Mutation(id, model) {
     this.onMutation = function(watch) {
         self.watch = watch;
     }
-    var dataModel = $(this.view).attr('data-model');
+    //var dataModel = $(this.view).attr('data-model');
+    var dataModel = this.view.dataset.model;
     this.isInput = function() {
        return $(this.view).is('input'); 
     }
@@ -20,12 +21,16 @@ function Mutation(id, model) {
         mutations.forEach(function(mutation) {
             //console.log('Mutation ', mutation);
             //TODO: Update model
-            if(mutation.type == "attributes") {
-                model[dataModel] = $(self.view).attr('value');
+            if(mutation.type == "attributes" && document.getElementById(id).hasAttribute('value')) {
+                //model[dataModel] = $(self.view).attr('value');
+                model[dataModel] = document.getElementById(id).getAttribute('value');
                 //model[dataModel] = mutation.target.value;
             }
             if(mutation.type == "characterData") {
-                model[dataModel] = mutation.target.textContent;    
+                model[dataModel] = mutation.target.textContent;
+                //Mustache
+                //updateAttributes(id, mutation.target.textContent);
+                
             }
 
         });    
@@ -36,6 +41,7 @@ function Mutation(id, model) {
     Object.observe(model, function(observed) {
         
         var modelValue = observed[0].object[dataModel];
+        updateAttributes(id, modelValue);
         if(typeof self.watch == "function") {
             self.watch(modelValue, observed[0].oldValue);    
         }
@@ -49,4 +55,13 @@ function Mutation(id, model) {
         
     });
     
+}
+function updateAttributes(id, value) {
+    var element = document.getElementById(id);
+    if(element && element !== null && element.dataset.attributes && element.dataset.attributes !== null) {
+        var attributes = element.dataset.attributes.split(' ');
+        attributes.forEach(function(attribute) {
+            element.setAttribute(attribute, value);    
+        });    
+    }
 }
