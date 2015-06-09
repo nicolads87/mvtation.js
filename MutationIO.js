@@ -16,24 +16,22 @@ function Mutation(id, model) {
             model[dataModel] = $(self.view).val();    
         }    
     }
-    //else {
-        var observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                //console.log('Mutation ', mutation);
-                //TODO: Update model
-                if(mutation.type == "attributes") {
-                    model[dataModel] = $(self.view).attr('value');
-                    //model[dataModel] = mutation.target.value;
-                }
-                if(mutation.type == "characterData") {
-                    model[dataModel] = mutation.target.textContent;    
-                }
-                
-            });    
-        });
-        var observerConf = {childList: true, attributes: true, characterData: true, characterDataOldValue: true, attributes: true, subtree: true};
-        observer.observe(this.view, observerConf);
-    //}
+    var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            //console.log('Mutation ', mutation);
+            //TODO: Update model
+            if(mutation.type == "attributes") {
+                model[dataModel] = $(self.view).attr('value');
+                //model[dataModel] = mutation.target.value;
+            }
+            if(mutation.type == "characterData") {
+                model[dataModel] = mutation.target.textContent;    
+            }
+
+        });    
+    });
+    var observerConf = {childList: true, attributes: true, characterData: true, characterDataOldValue: true, attributes: true, subtree: true};
+    observer.observe(this.view, observerConf);
     
     Object.observe(model, function(observed) {
         
@@ -52,7 +50,3 @@ function Mutation(id, model) {
     });
     
 }
-/*Mutation.prototype.onMutation = function(watch) {
-    console.log('onMutation');
-    this.watch = watch;
-}*/
