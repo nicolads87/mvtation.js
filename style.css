@@ -29,6 +29,7 @@ code {
     font-size: larger;
     background-color: beige;
     color: brown;
+    box-shadow: 2px 2px 5px gainsboro;
 }
 .bind {
     color:darkorange;
