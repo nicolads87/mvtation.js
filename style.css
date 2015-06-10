@@ -7,11 +7,29 @@ h3 {
     text-align: center;
     font-weight: 800;
 }
+h4 {
+    text-align: center;
+}
+main {
+    padding:  20px 20px 20px 20px;
+}
 .align-to-input {
     margin-top: 6px;
 }
 input[type="text"] {
     font-size: larger;
     font-weight: 900;
-    color: rgba(128, 128, 128, 0.79);
+/*    color: rgba(128, 128, 128, 0.79);*/
+    color: darkorange;
+}
+.row {
+    padding: 20px 20px 20px 20px;
+}
+code {
+    font-size: larger;
+    background-color: beige;
+    color: brown;
+}
+.bind {
+    color:darkorange;
 }

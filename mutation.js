@@ -1,19 +1,14 @@
-var person = {
-    
-    firstName: "Christophe",
-    lastName: "Coenraets",
-};
+var person = {  firstName: "Christophe", lastName: "Coenraets" };
+var model = {property: "Hello 2-way bind!"};
 
 
-
-
-$(document).ready(function() {
+window.onload = function() {
     var inputMut = new Mutation('mutations', person);
-    var el = new Mutation('element', person);
-    el.onMutation(function(n, o) {
-        //console.log('onM', n, o);
-    });
+    //var el = new Mutation('element', person);
+    MutationAll('two-way-bind', model);
+    MutationAll('person', person);
     
-
-
-});
+    var twoWay = new Mutation('test-mustache', person);
+    
+    
+}

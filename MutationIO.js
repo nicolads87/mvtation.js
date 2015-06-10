@@ -1,73 +1,67 @@
 'use strict';
 function Mutation(id, model) {
     var self = this;
-    this.view = document.getElementById(id);
+    var element = document.getElementById(id);
     this.onMutation = function(watch) {
         self.watch = watch;
     }
-    //var dataModel = $(this.view).attr('data-model');
-    var dataModel = this.view.dataset.model;
+    var dataModel = element.dataset.model;
     this.isInput = function() {
-       //return $(this.view).is('input');
-        return document.getElementById(id).tagName === "INPUT";  
+        return element.tagName === "INPUT";  
     }
     if(this.isInput()) {
-        //TODO: update when change value attribure from inspector. Use mutations.
-        this.view.onkeyup = function() {
-            document.getElementById(id).setAttribute('value', document.getElementById(id).value);
-            model[dataModel] = document.getElementById(id).value;    
-            //$(self.view).attr('value', $(self.view).val());
-            //model[dataModel] = $(self.view).val();    
+        element.value = model[dataModel];//init
+        element.onkeyup = function() {
+            element.setAttribute('value', element.value);
+            model[dataModel] = element.value;    
         }    
+    }else{
+        element.innerHTML = model[dataModel];//init
     }
+    updateAttributes(element, model[dataModel]);
     var observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
-            //console.log('Mutation ', mutation);
-            //TODO: Update model
-            if(mutation.type == "attributes" && document.getElementById(id).hasAttribute('value')) {
-                //model[dataModel] = $(self.view).attr('value');
-                model[dataModel] = document.getElementById(id).getAttribute('value');
-                //model[dataModel] = mutation.target.value;
+            if(mutation.type == "attributes" && element.hasAttribute('value')) {
+                model[dataModel] = element.getAttribute('value');
             }
             if(mutation.type == "characterData") {
                 model[dataModel] = mutation.target.textContent;
-                //Mustache
-                //updateAttributes(id, mutation.target.textContent);
-                
             }
-
         });    
     });
     var observerConf = {childList: true, attributes: true, characterData: true, characterDataOldValue: true, attributes: true, subtree: true};
-    observer.observe(this.view, observerConf);
-    
+    observer.observe(element, observerConf);
     Object.observe(model, function(observed) {
-        
         var modelValue = observed[0].object[dataModel];
-        updateAttributes(id, modelValue);
+        updateAttributes(element, modelValue);
         if(typeof self.watch == "function") {
             self.watch(modelValue, observed[0].oldValue);    
         }
-        
         if(self.isInput()) {
-            //$(self.view).attr('value', modelValue);
-            //$(self.view).val(modelValue); 
-            document.getElementById(id).value = modelValue;
-            document.getElementById(id).setAttribute('value', document.getElementById(id).value);
+            element.value = modelValue;
+            element.setAttribute('value', element.value);
         }else {
-            //$(self.view).html(modelValue);
-            document.getElementById(id).innerHTML = modelValue;
+            element.innerHTML = modelValue;
         }
-        
     });
-    
 }
-function updateAttributes(id, value) {
-    var element = document.getElementById(id);
+function updateAttributes(element, value) {
     if(element && element !== null && element.dataset.attributes && element.dataset.attributes !== null) {
         var attributes = element.dataset.attributes.split(' ');
         attributes.forEach(function(attribute) {
             element.setAttribute(attribute, value);    
         });    
+    }
+}
+function MutationAll(className, model) {
+    var elements = document.getElementsByClassName(className);
+    for(var k in elements) {
+        if(k === "length") {return;}
+        var element = elements[k];
+        if(element.hasAttribute('id') === false) {
+            var id = element.getAttribute('class') + '-'+ k;
+            element.setAttribute('id', id);
+            new Mutation(id, model);
+        }
     }
 }
