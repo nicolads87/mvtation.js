@@ -26,22 +26,30 @@
     <div class="row"><div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;&nbsp;&nbsp;</div></div>
     
     <main>
+        <!-- model -->
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <code>var person = {  firstName: "<span class="person bind" data-model="firstName">Christophe</span>", lastName: "<span class="person bind" data-model="lastName">Coenraets</span>" };</code>
+            </div>
+        </div>
+        
+        
         <div class="row">
             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
                 <input type="text" id="mutations" value="" data-model="firstName" class="form-control">
             </div>
             <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
-                <code>var person = {  firstName: "<span class="person bind" data-model="firstName">Christophe</span>", lastName: "<span class="person bind" data-model="lastName">Coenraets</span>" };</code><br>
+<!--                <code>var person = {  firstName: "<span class="person bind" data-model="firstName">Christophe</span>", lastName: "<span class="person bind" data-model="lastName">Coenraets</span>" };</code><br>-->
                 <code>&lt;input type="text" id="mutations" value="<span class="person bind" data-model="firstName">Christophe</span>" data-model="firstName" class="form-control"&gt;</code>
             </div>
         </div>
         <div class="row">
             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-                <pre>lastName: <span id="test-mustache" data-model="lastName" class="bind"></span></pre>
+                <pre>lastName: <span id="lastname" data-model="lastName" class="bind"></span></pre>
             </div>
             <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
                 <code>
-                    lastName: &lt;span id="test-mustache" data-model="lastName" class="bind"&gt;<span class="person bind" data-model="lastName">Coenraets</span>&lt;/span&gt;
+                    lastName: &lt;span id="lastname" data-model="lastName" class="bind"&gt;<span class="person bind" data-model="lastName">Coenraets</span>&lt;/span&gt;
                 </code>
             </div>
         </div>
@@ -55,12 +63,13 @@
         
         <div class="row">
             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-                <pre><p class="two-way-bind" data-model="property"></p></pre>
-                <pre><p class="two-way-bind" data-model="property" data-attributes="bind"></p></pre>
+                <pre><p class="multiple bind" data-model="property"></p></pre>
+                <pre><p class="multiple bind" data-model="property" data-attributes="bind"></p></pre>
             </div>
             <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
                 <code>var model = {property: "Hello 2-way bind!"}</code><br>
-                <code>&lt;p class="two-way-bind" data-model="property" data-attributes="bind"&gt;&lt;/p&gt;</code>
+                <code>&lt;p class="multiple" data-model="property"&gt;<span class="multiple bind" data-model="property"></span>&lt;/p&gt;</code><br>
+                <code>&lt;p class="multiple" data-model="property" bind="<span class="multiple bind" data-model="property"></span>" data-attributes="bind"&gt;<span class="multiple bind" data-model="property"></span>&lt;/p&gt;</code>
             </div>
             
         </div>
