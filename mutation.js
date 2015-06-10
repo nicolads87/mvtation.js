@@ -1,14 +1,17 @@
-var person = {  firstName: "Christophe", lastName: "Coenraets" };
-var model = {property: "Hello 2-way bind!"};
+var person = {  firstName: "Christophe", lastName: "Coenraets", gender: "female" };
+var model = { property: "multiple bind" };
+var radio = { value: true };
 
 
 window.onload = function() {
     var inputMut = new Mutation('mutations', person);
-    //var el = new Mutation('element', person);
-    MutationAll('two-way-bind', model);
+    MutationAll('multiple', model);
     MutationAll('person', person);
     
-    var twoWay = new Mutation('test-mustache', person);
+    
+    MutationAll('mutation-radio', person);
+    
+    var twoWay = new Mutation('lastname', person);
     
     
 }

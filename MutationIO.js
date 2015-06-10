@@ -10,11 +10,21 @@ function Mutation(id, model) {
         return element.tagName === "INPUT";  
     }
     if(this.isInput()) {
-        element.value = model[dataModel];//init
+        if(element.type === "text") {
+            element.value = model[dataModel];//init
+        }
         element.onkeyup = function() {
             element.setAttribute('value', element.value);
             model[dataModel] = element.value;    
-        }    
+        }
+        if(element.type === "radio") {
+            if(element.value === model[dataModel]) {
+                element.checked = true;
+            }
+            element.onchange = function() {
+                model[dataModel] = element.value;
+            }
+        }
     }else{
         element.innerHTML = model[dataModel];//init
     }
@@ -38,8 +48,13 @@ function Mutation(id, model) {
             self.watch(modelValue, observed[0].oldValue);    
         }
         if(self.isInput()) {
-            element.value = modelValue;
-            element.setAttribute('value', element.value);
+            if(element.type === "text") {
+                element.value = modelValue;
+                element.setAttribute('value', element.value);
+            }
+            if(element.type === "radio" && element.value === modelValue) {
+                element.checked = true;
+            }
         }else {
             element.innerHTML = modelValue;
         }
