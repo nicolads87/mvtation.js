@@ -1,3 +1,8 @@
+/**
+ * @license MVtationJS v0.0.1
+ * (c) 2015, N. De Simone
+ * License: MIT
+ */
 'use strict';
 function Mutation(id, model) {
     var self = this;
