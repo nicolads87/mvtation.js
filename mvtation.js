@@ -87,8 +87,8 @@
             }
         }
     }
-    mvtation.mute = Mutation;
-    mvtation.muteAll = MutationAll;
+    mvtation.mutate = Mutation;
+    mvtation.mutateAll = MutationAll;
     
     
 })(window);
