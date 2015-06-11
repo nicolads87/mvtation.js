@@ -1,6 +1,6 @@
 /**
  * @license MVtationJS v0.0.1
- * (c) 2015, N. De Simone
+ * (c) 2015, nicolads87 <nicola.ds87@gmail.com>
  * License: MIT
  */
 (function(window) {

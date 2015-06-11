@@ -1,5 +1,5 @@
 {
-  "name": "Mutation.io",
+  "name": "mvtation.js",
   "version": "0.0.0",
   "authors": [
     "nicolads87 <nicola.ds87@gmail.com>"
@@ -17,8 +17,6 @@
     "tests"
   ],
   "devDependencies": {
-    "bootstrap": "~3.3.4",
-    "angular": "~1.4.0",
-    "mustache": "~2.1.0"
+    "bootstrap": "~3.3.4"
   }
 }
