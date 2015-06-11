@@ -4,27 +4,39 @@
  * License: MIT
  */
 (function(window) {
-'use strict';
+    'use strict';
     var mvtation = ( window.mvtation || (window.mvtation = {}) );
+    function isInput(e) {return e.tagName === "INPUT";}
+    function isRadio(e) {return e.type === "radio";}
+    function isText(e) {return e.type === "text";}
+    
     function Mutation(id, model) {
-        var self = this;
-        var element = document.getElementById(id);
+        
+        var that = this, element = document.getElementById(id), dataModel = element.dataset.model;
+        var observerConf = {
+            childList: true, 
+            attributes: true, 
+            characterData: true, 
+            characterDataOldValue: true, 
+            attributes: true, 
+            subtree: true
+        };
+        
         this.onMutation = function(watch) {
-            self.watch = watch;
+            that.watch = watch;
         }
-        var dataModel = element.dataset.model;
-        this.isInput = function() {
-            return element.tagName === "INPUT";  
-        }
-        if(this.isInput()) {
-            if(element.type === "text") {
+        
+        
+        
+        if(isInput(element)) {
+            if(isText(element)) {
                 element.value = model[dataModel];//init
             }
             element.onkeyup = function() {
                 element.setAttribute('value', element.value);
                 model[dataModel] = element.value;    
             }
-            if(element.type === "radio") {
+            if(isRadio(element)) {
                 if(element.value === model[dataModel]) {
                     element.checked = true;
                 }
@@ -35,6 +47,8 @@
         }else{
             element.innerHTML = model[dataModel];//init
         }
+        
+        
         updateAttributes(element, model[dataModel]);
         var observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
@@ -46,20 +60,24 @@
                 }
             });    
         });
-        var observerConf = {childList: true, attributes: true, characterData: true, characterDataOldValue: true, attributes: true, subtree: true};
+        
         observer.observe(element, observerConf);
+        
+        /**
+         * This is an experimental technology, part of the Harmony (ECMAScript 7) proposal.
+         */
         Object.observe(model, function(observed) {
             var modelValue = observed[0].object[dataModel];
             updateAttributes(element, modelValue);
-            if(typeof self.watch == "function") {
-                self.watch(modelValue, observed[0].oldValue);    
+            if(typeof that.watch == "function") {
+                that.watch(modelValue, observed[0].oldValue);    
             }
-            if(self.isInput()) {
-                if(element.type === "text") {
+            if(isInput(element)) {
+                if(isText(element)) {
                     element.value = modelValue;
                     element.setAttribute('value', element.value);
                 }
-                if(element.type === "radio" && element.value === modelValue) {
+                if(isRadio(element) && element.value === modelValue) {
                     element.checked = true;
                 }
             }else {

@@ -27,9 +27,9 @@ input[type="text"] {
 }
 code {
     font-size: larger;
-    background-color: beige;
+    background-color: ghostwhite;
     color: brown;
-    box-shadow: 2px 2px 5px gainsboro;
+/*    box-shadow: 2px 2px 5px gainsboro;*/
 }
 .bind {
     color:darkorange;
