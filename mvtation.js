@@ -137,7 +137,7 @@
 
     /**
      * @constructor
-     *
+     * @propery {Array} watchers Array of listener
      */
     function Watcher(watchers) {
         this.watchers = watchers;
@@ -162,7 +162,14 @@
     function Mutation(id, model) {
         if(typeof model !== "object") { throw new Error("model must be object"); }
         var that = this, element = document.getElementById(id), dataModel = element.dataset.model;
+        /**
+         * _watchersDOM At init syncs the view with the model and bind input element events because the MutationObserver not react on onkeyup, onchange dom events
+         */
         var _watchersDOM = new Watcher([inputWatcherDom, anyWatcherDom, updateDomAttributesDom]);
+        
+        /**
+         * _watchersModel Syncs the view with the model
+         */
         var _watchersModel = new Watcher([inputWatcherModel, anyWatcherModel, updateDomAttributesModel]);
         var observerConf = {
             childList: true, 
@@ -179,7 +186,7 @@
         
         _watchersDOM.listen(element, [model, dataModel]);
         
-        var observer = new MutationObserver(function(mutations) {
+        new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if(mutation.type == "attributes" && element.hasAttribute('value')) {
                     model[dataModel] = element.getAttribute('value');
@@ -188,9 +195,8 @@
                     model[dataModel] = mutation.target.textContent;
                 }
             });    
-        });
+        }).observe(element, observerConf);
         
-        observer.observe(element, observerConf);
         
         /**
          * This is an experimental technology, part of the Harmony (ECMAScript 7) proposal.
