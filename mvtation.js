@@ -134,9 +134,23 @@
             });    
         }    
     };
-    //=============================================================================================================
-    var _watchersDOM = [inputWatcherDom, anyWatcherDom, updateDomAttributesDom];
-    var _watchersModel = [inputWatcherModel, anyWatcherModel, updateDomAttributesModel];
+
+    /**
+     * @constructor
+     *
+     */
+    function Watcher(watchers) {
+        this.watchers = watchers;
+    }
+    Watcher.prototype.listen = function(element, args) {
+        this.watchers.forEach(function(watcher) {
+            watcher.apply(element, args);    
+        });    
+    }
+    
+    
+    
+    
     
     
     /**
@@ -148,6 +162,8 @@
     function Mutation(id, model) {
         if(typeof model !== "object") { throw new Error("model must be object"); }
         var that = this, element = document.getElementById(id), dataModel = element.dataset.model;
+        var _watchersDOM = new Watcher([inputWatcherDom, anyWatcherDom, updateDomAttributesDom]);
+        var _watchersModel = new Watcher([inputWatcherModel, anyWatcherModel, updateDomAttributesModel]);
         var observerConf = {
             childList: true, 
             attributes: true, 
@@ -161,9 +177,7 @@
             that.watch = watch;
         }
         
-        _watchersDOM.forEach(function(watcher) {
-            watcher.apply(element, [model, dataModel]);
-        });
+        _watchersDOM.listen(element, [model, dataModel]);
         
         var observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
@@ -186,9 +200,7 @@
             if(typeof that.watch == "function") {
                 that.watch(value, observed[0].oldValue);    
             }
-            _watchersModel.forEach(function(watcher) {
-                watcher.apply(element, [value]);
-            });
+            _watchersModel.listen(element, [value]);
             
         });
     }
@@ -209,8 +221,8 @@
     }
     mvtation.mutate = Mutation;
     mvtation.mutateAll = MutationAll;
-    Object.prototype.accessTo = accessTo;
-    Object.prototype.setTo = setTo;
+    //Object.prototype.accessTo = accessTo;
+    //Object.prototype.setTo = setTo;
     
     
 })(window);
