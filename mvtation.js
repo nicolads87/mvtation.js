@@ -52,26 +52,26 @@
     }
     //=============================================================================================================
     /**
-     * Update the view-model on DOM change
+     * Update the view-model on DOM change. important, 'this' in the function scope is the dom element
      */
-    var inputWatcherDom = function(element, model, dataModel) {
-        if(isInput(element)) {
+    var inputWatcherDom = function(model, dataModel) {
+        if(isInput(this)) {
             /** init input text with model value. Init the text value and the attribute value */
-            if(isText(element)) {
-                element.value = model[dataModel];
-                element.setAttribute('value', element.value);
+            if(isText(this)) {
+                this.value = model[dataModel];
+                this.setAttribute('value', this.value);
             }
-            element.onkeyup = function() {
-                element.setAttribute('value', element.value);
-                model[dataModel] = element.value;    
+            this.onkeyup = function() {
+                this.setAttribute('value', this.value);
+                model[dataModel] = this.value;    
             }
-            if(isRadio(element)) {
+            if(isRadio(this)) {
                 /** init input radio with model value */
-                if(element.value === model[dataModel]) {
-                    element.checked = true;
+                if(this.value === model[dataModel]) {
+                    this.checked = true;
                 }
-                element.onchange = function() {
-                    model[dataModel] = element.value;
+                this.onchange = function() {
+                    model[dataModel] = this.value;
                 }
             }
         }
@@ -80,33 +80,33 @@
     /**
      * Update the view-model (<input>) on model change
      */
-    var inputWatcherModel = function(element, value) {
-        if(isInput(element)) {
-            if(isText(element)) {
-                element.value = value;
-                element.setAttribute('value', element.value);
+    var inputWatcherModel = function(value) {
+        if(isInput(this)) {
+            if(isText(this)) {
+                this.value = value;
+                this.setAttribute('value', this.value);
             }
-            if(isRadio(element) && element.value === value) {
-                element.checked = true;
+            if(isRadio(this) && this.value === value) {
+                this.checked = true;
             }
         }    
     };
     /**
      * Update the view-model (<any>) on model change
      */
-    var anyWatcherModel = function(element, value) {
+    var anyWatcherModel = function(value) {
         /** init input radio with model value */
-        if(!isInput(element)) {
-            element.innerHTML = value;
+        if(!isInput(this)) {
+            this.innerHTML = value;
         }    
     };
     
     /**
      * Update the model on DOM change
      */
-    var anyWatcherDom = function(element, model, dataModel) {
-        if(!isInput(element)) {
-            element.innerHTML = model[dataModel];
+    var anyWatcherDom = function(model, dataModel) {
+        if(!isInput(this)) {
+            this.innerHTML = model[dataModel];
         }    
     };
     
@@ -114,21 +114,23 @@
      * Update element attributes
      *
      */
-    var updateDomAttributesModel = function(element, value) {
-        if(element && element !== null && element.dataset.attributes && element.dataset.attributes !== null) {
-            var attributes = element.dataset.attributes.split(' ');
+    var updateDomAttributesModel = function(value) {
+        if(this && this !== null && this.dataset.attributes && this.dataset.attributes !== null) {
+            var attributes = this.dataset.attributes.split(' ');
+            var that = this;
             attributes.forEach(function(attribute) {
-                element.setAttribute(attribute, value);    
+                that.setAttribute(attribute, value);    
             });    
         }    
     };
     
-    var updateDomAttributesDom = function(element, model, dataModel) {
+    var updateDomAttributesDom = function(model, dataModel) {
         var value = model[dataModel];
-        if(element && element !== null && element.dataset.attributes && element.dataset.attributes !== null) {
-            var attributes = element.dataset.attributes.split(' ');
+        if(this && this !== null && this.dataset.attributes && this.dataset.attributes !== null) {
+            var that = this;
+            var attributes = this.dataset.attributes.split(' ');
             attributes.forEach(function(attribute) {
-                element.setAttribute(attribute, value);    
+                that.setAttribute(attribute, value);    
             });    
         }    
     };
@@ -159,9 +161,10 @@
             that.watch = watch;
         }
         
-        _watchersDOM.forEach(function(watcher) {watcher(element, model, dataModel);});
+        _watchersDOM.forEach(function(watcher) {
+            watcher.apply(element, [model, dataModel]);
+        });
         
-//        updateAttributes(element, model[dataModel]);
         var observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if(mutation.type == "attributes" && element.hasAttribute('value')) {
@@ -180,25 +183,18 @@
          */
         Object.observe(model, function(observed) {
             var value = observed[0].object[dataModel];
-//            updateAttributes(element, value);
             if(typeof that.watch == "function") {
                 that.watch(value, observed[0].oldValue);    
             }
-            _watchersModel.forEach(function(watcher) {watcher(element, value);});
+            _watchersModel.forEach(function(watcher) {
+                watcher.apply(element, [value]);
+            });
             
         });
     }
     
     
     
-    /*function updateAttributes(element, value) {
-        if(element && element !== null && element.dataset.attributes && element.dataset.attributes !== null) {
-            var attributes = element.dataset.attributes.split(' ');
-            attributes.forEach(function(attribute) {
-                element.setAttribute(attribute, value);    
-            });    
-        }
-    }*/
     function MutationAll(className, model) {
         var elements = document.getElementsByClassName(className);
         for(var k in elements) {
