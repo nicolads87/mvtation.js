@@ -6,9 +6,106 @@
 (function(window) {
     'use strict';
     var mvtation = ( window.mvtation || (window.mvtation = {}) );
+    var _GET = "GET", _POST = "POST";
     function isInput(e) {return e.tagName === "INPUT";}
     function isRadio(e) {return e.type === "radio";}
     function isText(e) {return e.type === "text";}
+    
+    /**
+     * Recurvive method to GET/POST a property
+     *
+     */
+    function recursiveDeepAccess(properties, method, object, value) {
+       if(properties.length === 1) {
+           if(method === _GET) {
+                return (object) ? object[properties[0]] : undefined;
+           } else if (method === _POST) {
+                (object) ? object[properties[0]] = value : (console.warn("Cannot set property '" + properties[0] + "' of undefined"));
+           }
+       }else {
+           if(typeof object[properties.slice(0,1)] === "undefined" && method === _POST) {
+               Object.defineProperty(object, properties.slice(0,1), {writable: true, value: {}});
+           }
+           return recursiveDeepAccess(properties.slice(1,properties.length), method, object[properties.slice(0,1)], value);
+       }
+    }
+    /**
+     *
+     * Object prototype
+     * @params {string} string to access to object es: "prop1.prop2.prop3"
+     * @return the value of nth-propery
+     * @example
+     * var obj = {prop1: "hi", prop2: {prop3: "hello", prop4: {prop5: "anything"}}};
+     * Get a property with obj.accessTo("prop1"), obj.accessTo("prop1.prop2") etc..
+     *
+     *
+     */
+    function accessTo(string) {
+        return recursiveDeepAccess(string.split('.'), _GET, this);
+    }
+    function setTo(string, value) {
+        return recursiveDeepAccess(string.split('.'), _POST, this, value);
+    }
+    
+    /**
+     * Update the view-model on DOM change
+     */
+    var inputWatcherDom = function(element, model, dataModel) {
+        if(isInput(element)) {
+            /** init input text with model value */
+            if(isText(element)) {
+                element.value = model[dataModel];
+            }
+            element.onkeyup = function() {
+                element.setAttribute('value', element.value);
+                model[dataModel] = element.value;    
+            }
+            if(isRadio(element)) {
+                /** init input radio with model value */
+                if(element.value === model[dataModel]) {
+                    element.checked = true;
+                }
+                element.onchange = function() {
+                    model[dataModel] = element.value;
+                }
+            }
+        }
+    };
+    
+    /**
+     * Update the view-model (<input>) on model change
+     */
+    var inputWatcherModel = function(element, modelValue) {
+        if(isInput(element)) {
+            if(isText(element)) {
+                element.value = modelValue;
+                element.setAttribute('value', element.value);
+            }
+            if(isRadio(element) && element.value === modelValue) {
+                element.checked = true;
+            }
+        }    
+    };
+    /**
+     * Update the view-model (<any>) on model change
+     */
+    var anyWatcherModel = function(element, modelValue) {
+        /** init input radio with model value */
+        if(!isInput(element)) {
+            element.innerHTML = modelValue;
+        }    
+    };
+    
+    /**
+     * Update the model on DOM change
+     */
+    var anyWatcherDom = function(element, model, dataModel) {
+        if(!isInput(element)) {
+            element.innerHTML = model[dataModel];
+        }    
+    };
+    var _watchersDOM = [inputWatcherDom, anyWatcherDom];
+    var _watchersModel = [inputWatcherModel, anyWatcherModel];
     
     function Mutation(id, model) {
         
@@ -26,9 +123,11 @@
             that.watch = watch;
         }
         
+        _watchersDOM.forEach(function(watcher) {
+            watcher(element, model, dataModel);
+        });
         
-        
-        if(isInput(element)) {
+        /*if(isInput(element)) {
             if(isText(element)) {
                 element.value = model[dataModel];//init
             }
@@ -46,7 +145,7 @@
             }
         }else{
             element.innerHTML = model[dataModel];//init
-        }
+        }*/
         
         
         updateAttributes(element, model[dataModel]);
@@ -72,7 +171,10 @@
             if(typeof that.watch == "function") {
                 that.watch(modelValue, observed[0].oldValue);    
             }
-            if(isInput(element)) {
+            _watchersModel.forEach(function(watcher) {
+                watcher(element, modelValue);
+            });
+            /*if(isInput(element)) {
                 if(isText(element)) {
                     element.value = modelValue;
                     element.setAttribute('value', element.value);
@@ -82,7 +184,7 @@
                 }
             }else {
                 element.innerHTML = modelValue;
-            }
+            }*/
         });
     }
     function updateAttributes(element, value) {
@@ -107,6 +209,8 @@
     }
     mvtation.mutate = Mutation;
     mvtation.mutateAll = MutationAll;
+    Object.prototype.accessTo = accessTo;
+    Object.prototype.setTo = setTo;
     
     
 })(window);
