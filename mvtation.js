@@ -20,7 +20,11 @@
            if(method === _GET) {
                 return (object) ? object[properties[0]] : undefined;
            } else if (method === _POST) {
-                (object) ? object[properties[0]] = value : (throw new Error("recursiveDeepAccess"));
+               if(object) {
+                    object[properties[0]] = value;       
+               }else {
+                   throw new Error("RecursiveDeepAccess object undefined");
+               }
            }
        }else {
            if(typeof object[properties.slice(0,1)] === "undefined" && method === _POST) {
@@ -46,15 +50,16 @@
     function setTo(string, value) {
         return recursiveDeepAccess(string.split('.'), _POST, this, value);
     }
-    
+    //=============================================================================================================
     /**
      * Update the view-model on DOM change
      */
     var inputWatcherDom = function(element, model, dataModel) {
         if(isInput(element)) {
-            /** init input text with model value */
+            /** init input text with model value. Init the text value and the attribute value */
             if(isText(element)) {
                 element.value = model[dataModel];
+                element.setAttribute('value', element.value);
             }
             element.onkeyup = function() {
                 element.setAttribute('value', element.value);
@@ -75,13 +80,13 @@
     /**
      * Update the view-model (<input>) on model change
      */
-    var inputWatcherModel = function(element, modelValue) {
+    var inputWatcherModel = function(element, value) {
         if(isInput(element)) {
             if(isText(element)) {
-                element.value = modelValue;
+                element.value = value;
                 element.setAttribute('value', element.value);
             }
-            if(isRadio(element) && element.value === modelValue) {
+            if(isRadio(element) && element.value === value) {
                 element.checked = true;
             }
         }    
@@ -89,10 +94,10 @@
     /**
      * Update the view-model (<any>) on model change
      */
-    var anyWatcherModel = function(element, modelValue) {
+    var anyWatcherModel = function(element, value) {
         /** init input radio with model value */
         if(!isInput(element)) {
-            element.innerHTML = modelValue;
+            element.innerHTML = value;
         }    
     };
     
@@ -104,8 +109,32 @@
             element.innerHTML = model[dataModel];
         }    
     };
-    var _watchersDOM = [inputWatcherDom, anyWatcherDom];
-    var _watchersModel = [inputWatcherModel, anyWatcherModel];
+    
+    /**
+     * Update element attributes
+     *
+     */
+    var updateDomAttributesModel = function(element, value) {
+        if(element && element !== null && element.dataset.attributes && element.dataset.attributes !== null) {
+            var attributes = element.dataset.attributes.split(' ');
+            attributes.forEach(function(attribute) {
+                element.setAttribute(attribute, value);    
+            });    
+        }    
+    };
+    
+    var updateDomAttributesDom = function(element, model, dataModel) {
+        var value = model[dataModel];
+        if(element && element !== null && element.dataset.attributes && element.dataset.attributes !== null) {
+            var attributes = element.dataset.attributes.split(' ');
+            attributes.forEach(function(attribute) {
+                element.setAttribute(attribute, value);    
+            });    
+        }    
+    };
+    //=============================================================================================================
+    var _watchersDOM = [inputWatcherDom, anyWatcherDom, updateDomAttributesDom];
+    var _watchersModel = [inputWatcherModel, anyWatcherModel, updateDomAttributesModel];
     
     
     /**
@@ -115,6 +144,7 @@
      * @property {object} modele The model
      */
     function Mutation(id, model) {
+        if(typeof model !== "object") { throw new Error("model must be object"); }
         var that = this, element = document.getElementById(id), dataModel = element.dataset.model;
         var observerConf = {
             childList: true, 
@@ -131,7 +161,7 @@
         
         _watchersDOM.forEach(function(watcher) {watcher(element, model, dataModel);});
         
-        updateAttributes(element, model[dataModel]);
+//        updateAttributes(element, model[dataModel]);
         var observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if(mutation.type == "attributes" && element.hasAttribute('value')) {
@@ -149,26 +179,26 @@
          * This is an experimental technology, part of the Harmony (ECMAScript 7) proposal.
          */
         Object.observe(model, function(observed) {
-            var modelValue = observed[0].object[dataModel];
-            updateAttributes(element, modelValue);
+            var value = observed[0].object[dataModel];
+//            updateAttributes(element, value);
             if(typeof that.watch == "function") {
-                that.watch(modelValue, observed[0].oldValue);    
+                that.watch(value, observed[0].oldValue);    
             }
-            _watchersModel.forEach(function(watcher) {watcher(element, modelValue);});
+            _watchersModel.forEach(function(watcher) {watcher(element, value);});
             
         });
     }
     
     
     
-    function updateAttributes(element, value) {
+    /*function updateAttributes(element, value) {
         if(element && element !== null && element.dataset.attributes && element.dataset.attributes !== null) {
             var attributes = element.dataset.attributes.split(' ');
             attributes.forEach(function(attribute) {
                 element.setAttribute(attribute, value);    
             });    
         }
-    }
+    }*/
     function MutationAll(className, model) {
         var elements = document.getElementsByClassName(className);
         for(var k in elements) {
