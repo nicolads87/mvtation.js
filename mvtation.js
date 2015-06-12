@@ -20,7 +20,7 @@
            if(method === _GET) {
                 return (object) ? object[properties[0]] : undefined;
            } else if (method === _POST) {
-                (object) ? object[properties[0]] = value : (console.warn("Cannot set property '" + properties[0] + "' of undefined"));
+                (object) ? object[properties[0]] = value : (throw new Error("recursiveDeepAccess"));
            }
        }else {
            if(typeof object[properties.slice(0,1)] === "undefined" && method === _POST) {
@@ -107,8 +107,14 @@
     var _watchersDOM = [inputWatcherDom, anyWatcherDom];
     var _watchersModel = [inputWatcherModel, anyWatcherModel];
     
+    
+    /**
+     *
+     * @constructor
+     * @property {string} id The id of view
+     * @property {object} modele The model
+     */
     function Mutation(id, model) {
-        
         var that = this, element = document.getElementById(id), dataModel = element.dataset.model;
         var observerConf = {
             childList: true, 
@@ -123,30 +129,7 @@
             that.watch = watch;
         }
         
-        _watchersDOM.forEach(function(watcher) {
-            watcher(element, model, dataModel);
-        });
-        
-        /*if(isInput(element)) {
-            if(isText(element)) {
-                element.value = model[dataModel];//init
-            }
-            element.onkeyup = function() {
-                element.setAttribute('value', element.value);
-                model[dataModel] = element.value;    
-            }
-            if(isRadio(element)) {
-                if(element.value === model[dataModel]) {
-                    element.checked = true;
-                }
-                element.onchange = function() {
-                    model[dataModel] = element.value;
-                }
-            }
-        }else{
-            element.innerHTML = model[dataModel];//init
-        }*/
-        
+        _watchersDOM.forEach(function(watcher) {watcher(element, model, dataModel);});
         
         updateAttributes(element, model[dataModel]);
         var observer = new MutationObserver(function(mutations) {
@@ -171,22 +154,13 @@
             if(typeof that.watch == "function") {
                 that.watch(modelValue, observed[0].oldValue);    
             }
-            _watchersModel.forEach(function(watcher) {
-                watcher(element, modelValue);
-            });
-            /*if(isInput(element)) {
-                if(isText(element)) {
-                    element.value = modelValue;
-                    element.setAttribute('value', element.value);
-                }
-                if(isRadio(element) && element.value === modelValue) {
-                    element.checked = true;
-                }
-            }else {
-                element.innerHTML = modelValue;
-            }*/
+            _watchersModel.forEach(function(watcher) {watcher(element, modelValue);});
+            
         });
     }
+    
+    
+    
     function updateAttributes(element, value) {
         if(element && element !== null && element.dataset.attributes && element.dataset.attributes !== null) {
             var attributes = element.dataset.attributes.split(' ');
