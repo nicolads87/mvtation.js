@@ -4,14 +4,17 @@ var radio = { value: true };
 
 
 window.onload = function() {
-    var inputMut = new mvtation.mutate('mutations', person);
-    mvtation.mutateAll('multiple', model);
-    mvtation.mutateAll('person', person);
+    mvtation.bindElementById('mutations')(person);
     
     
-    mvtation.mutateAll('mutation-radio', person);
+    mvtation.bindElementsByClassName('multiple')(model);
     
-    var twoWay = new mvtation.mutate('lastname', person);
+    
+    mvtation.bindElementsByClassName('person')(person);
+    
+    mvtation.bindElementsByClassName('mutation-radio')(person);
+    
+    mvtation.bindElementById('lastname')(person);
     
     
 }

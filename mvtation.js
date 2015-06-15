@@ -139,10 +139,10 @@
      * @constructor
      * @propery {Array} watchers Array of listener
      */
-    function Watcher(watchers) {
+    function Synchronizer(watchers) {
         this.watchers = watchers;
     }
-    Watcher.prototype.listen = function(element, args) {
+    Synchronizer.prototype.sync = function(element, args) {
         this.watchers.forEach(function(watcher) {
             watcher.apply(element, args);    
         });    
@@ -159,18 +159,21 @@
      * @property {string} id The id of view
      * @property {object} modele The model
      */
-    function Mutation(id, model) {
-        if(typeof model !== "object") { throw new Error("model must be object"); }
-        var that = this, element = document.getElementById(id), dataModel = element.dataset.model;
+    function Bind(element, model) {
+        if(typeof model !== "object") { 
+            throw new Error("model must be object"); 
+        }
+//        var element = document.getElementById(id);
+        var that = this , dataModel = element.dataset.model;
         /**
-         * _watchersDOM At init syncs the view with the model and bind input element events because the MutationObserver not react on onkeyup, onchange dom events
+         * initialSync At init syncs the view with the model and bind input element events because the MutationObserver not react on onkeyup, onchange dom events
          */
-        var _watchersDOM = new Watcher([inputWatcherDom, anyWatcherDom, updateDomAttributesDom]);
+        var initialSync = new Synchronizer([inputWatcherDom, anyWatcherDom, updateDomAttributesDom]);
         
         /**
-         * _watchersModel Syncs the view with the model
+         * synchronizer Syncs the view with the model
          */
-        var _watchersModel = new Watcher([inputWatcherModel, anyWatcherModel, updateDomAttributesModel]);
+        var synchronizer = new Synchronizer([inputWatcherModel, anyWatcherModel, updateDomAttributesModel]);
         var observerConf = {
             childList: true, 
             attributes: true, 
@@ -180,11 +183,8 @@
             subtree: true
         };
         
-        this.onMutation = function(watch) {
-            that.watch = watch;
-        }
         
-        _watchersDOM.listen(element, [model, dataModel]);
+        initialSync.sync(element, [model, dataModel]);
         
         new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
@@ -203,32 +203,40 @@
          */
         Object.observe(model, function(observed) {
             var value = observed[0].object[dataModel];
-            if(typeof that.watch == "function") {
-                that.watch(value, observed[0].oldValue);    
-            }
-            _watchersModel.listen(element, [value]);
+            synchronizer.sync(element, [value]);
             
         });
     }
     
     
     
-    function MutationAll(className, model) {
-        var elements = document.getElementsByClassName(className);
-        for(var k in elements) {
-            if(k === "length") {return;}
-            var element = elements[k];
-            if(element.hasAttribute('id') === false) {
-                var id = element.getAttribute('class') + '-'+ k;
-                element.setAttribute('id', id);
-                new Mutation(id, model);
-            }
+
+    
+    mvtation.bindElementById = function(id) {
+        var element = document.getElementById(id);
+        if(typeof element === null) {
+            throw new Error('Element not found!');
+        }
+        /** Apply scope to element */
+        return function(scope) {
+            return new Bind(element, scope);    
         }
     }
-    mvtation.mutate = Mutation;
-    mvtation.mutateAll = MutationAll;
-    //Object.prototype.accessTo = accessTo;
-    //Object.prototype.setTo = setTo;
+    mvtation.bindElementsByClassName = function(className) {
+        var elements = document.getElementsByClassName(className);
+        /** Apply scope to elements */
+        return function(scope) {
+            for(var k in elements) {
+                if(k === "length") {return;}
+                var element = elements[k];
+                if(element.hasAttribute('id') === false) {
+                    var id = element.getAttribute('class') + '-'+ k;
+                    element.setAttribute('id', id);
+                    new Bind(document.getElementById(id), scope);
+                }
+            }    
+        }
+    }
     
     
 })(window);
